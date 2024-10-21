@@ -1,0 +1,54 @@
+CREATE TABLE lift (
+    id SERIAL PRIMARY KEY,
+    capacity_kg int
+);
+
+
+INSERT INTO lift (id, capacity_kg)
+VALUES
+(1, 300),
+(2, 350);
+
+
+
+CREATE TABLE lift_passengers (
+    id int,
+    pasenger_name varchar(50),
+	weight_kg int
+);
+
+
+INSERT INTO lift_passengers (id, pasenger_name, weight_kg)
+VALUES
+(1, 'Rahul', 85),
+(1, 'Adarsh', 73),
+(1, 'Riti', 95),
+(1, 'Dheeraj', 80),
+(2, 'Vimal', 83),
+(2, 'Neha', 77),
+(2, 'Priti', 73),
+(2, 'Himanshi', 85);
+
+select * from lift;
+select * from lift_passengers;
+
+
+--QUESTION
+
+Write an sql query that produces comma seperated list of passengers who can be accomodated in each lift without exceeding the 
+lifts capacity. The passengers in the lift should be ordered by their weight in ascending order.
+
+
+
+--SOLUTION
+
+select id, string_agg(pasenger_name, ' , ') as passengers
+from (
+	select b.*, a.capacity_kg,
+	sum(weight_kg) over(partition by b.id order by b.id, weight_kg) as cum_sum
+	from lift as a
+	join lift_passengers as b on a.id = b.id
+	order by b.id, weight_kg
+	) as a
+where cum_sum < capacity_kg
+group by id
